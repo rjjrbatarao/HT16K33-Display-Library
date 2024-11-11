@@ -6,36 +6,39 @@
 #include <Wire.h>
 #include <HT16K33Disp.h>
 //-----------------------
-HT16K33Disp disp;
-byte add = 0x70;
+HT16K33Disp disp(0x70);
+
 //------------------------------------------------
 void setup()
 {
+  Serial.begin(115200);
   Wire.begin();
-  disp.Init(add, 8);
-  disp.Clear(add);
+  //Wire.setClock(100000);
+  disp.begin();
+  disp.Clear();
   delay(1000);
+  Serial.println("Started");
 }
 //------------------------------------------------
 void loop()
 {
-  disp.Text(add, "PLAY");
+  disp.Text("PLAY");
   delay(1000);
-  disp.Clear(add);
+  disp.Clear();
   delay(1000);
-  disp.Text(add, "C=");
+  disp.Text( "C=");
   //------------------------------
   for(byte MSD=0; MSD<=9; MSD++)
   {
-    disp.Num(add, 2, MSD);
+    disp.Num( 2, MSD);
     for(byte LSD=0; LSD<=9; LSD++)
     {
-      disp.Num(add, 3, LSD);
+      disp.Num( 3, LSD);
       delay(200);
     }
   }
   //------------------------------
   delay(1000);
-  disp.Clear(add);
+  disp.Clear();
   delay(1000);
 }

@@ -7,7 +7,7 @@
 #include <DHT.h>
 #include <HT16K33Disp.h>
 //-----------------------
-HT16K33Disp disp;
+HT16K33Disp disp(0x70);
 DHT dht(8, DHT22);
 //-----------------------
 byte add = 0x70;
@@ -19,8 +19,8 @@ void setup()
 {
   Wire.begin();
   dht.begin();
-  disp.Init(add, 8);
-  disp.Clear(add);
+  disp.begin();
+  disp.Clear();
 }
 //------------------------------------------------------
 void loop()
@@ -29,9 +29,9 @@ void loop()
   disp_temp();
   if(millis() - millisCapture > myDelay)
   {
-    disp.Clear(add); delay(1000);
+    disp.Clear(); delay(1000);
     disp_hum(); delay(3000);
-    disp.Clear(add);
+    disp.Clear();
   }
 }
 //------------------------------------------------------
@@ -42,10 +42,10 @@ void disp_temp()
   temp_LSD = int(temp)%10;
   temp_fraction = (temp - int(temp))*10;
   //----------------------------------------------------
-  disp.Num(0x70, 0, temp_MSD);
-  disp.Numdp(0x70, 1, temp_LSD);
-  disp.Num(0x70, 2, temp_fraction);
-  disp.Char(0x70, 3, 'C');
+  disp.Num( 0, temp_MSD);
+  disp.Numdp( 1, temp_LSD);
+  disp.Num( 2, temp_fraction);
+  disp.Char( 3, 'C');
 }
 //------------------------------------------------------
 void disp_hum()
@@ -54,10 +54,10 @@ void disp_hum()
   hum_MSD = humidity/10;
   hum_LSD = humidity%10;
   //----------------------------------------------------
-  disp.Char(0x70, 0, 'H');
-  disp.Num(0x70, 1, hum_MSD);
-  disp.Num(0x70, 2, hum_LSD);
-  disp.Char(0x70, 3, 'P');
+  disp.Char( 0, 'H');
+  disp.Num( 1, hum_MSD);
+  disp.Num( 2, hum_LSD);
+  disp.Char( 3, 'P');
   //----------------------------------------------------
   millisCapture = millis();
 }

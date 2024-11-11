@@ -7,7 +7,10 @@
 //------------------------------------------------------------
 // Constructor
 //------------------------------------------------------------
-HT16K33Disp::HT16K33Disp() {}
+HT16K33Disp::HT16K33Disp(const uint8_t address, TwoWire *wire) {
+  _address = address;
+  _wire = wire;
+}
 //------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------
@@ -16,34 +19,43 @@ uint16_t convertdp(int);
 //------------------------------------------------------------
 // Methods
 //------------------------------------------------------------
-void HT16K33Disp::Init(byte address, byte brightLevel)
+bool HT16K33Disp::begin(byte brightLevel)
 {
-    Wire.beginTransmission(address);
-    Wire.write(0x21);               //normal operation mode
-    Wire.endTransmission(false);
+	if (! isConnected()) return false;
+    _wire->beginTransmission(_address);
+    _wire->write(0x21);               //normal operation mode
+    _wire->endTransmission();
     //--------------------------------------------------------
-    Wire.beginTransmission(address);
-    Wire.write(0xE0+brightLevel);   //brightness level
-    Wire.endTransmission(false);
+    _wire->beginTransmission(_address);
+    _wire->write(0x81);               //display ON, blinking OFF
+    _wire->endTransmission();	
     //--------------------------------------------------------
-    Wire.beginTransmission(address);
-    Wire.write(0x81);               //display ON, blinking OFF
-    Wire.endTransmission();
+    _wire->beginTransmission(_address);
+    _wire->write(0xE0 | brightLevel);   //brightness level
+    _wire->endTransmission();
+
+	return true;
 }
+bool HT16K33Disp::isConnected()
+{
+  _wire->beginTransmission(_address);
+  return (0 == _wire->endTransmission());
+}
+
 //------------------------------------------------------------
-void HT16K33Disp::Char(byte address, byte digit, char c1)
+void HT16K33Disp::Char(byte digit, char c1)
 {
     uint16_t c2; 
     c2 = convert(c1);
     //------------------------------
-    Wire.beginTransmission(address);
-    Wire.write(digit*2);
-    Wire.write(c2 & 0x00FF);
-    Wire.write((c2 & 0xFF00) >> 8);
-    Wire.endTransmission();
+    _wire->beginTransmission(_address);
+    _wire->write(digit*2);
+    _wire->write(c2 & 0x00FF);
+    _wire->write((c2 & 0xFF00) >> 8);
+    _wire->endTransmission();
 }
 //------------------------------------------------------------
-void HT16K33Disp::Text(byte address, String text1)
+void HT16K33Disp::Text(String text1)
 {
     char text2[5]; uint16_t c2;
     text1.toCharArray(text2, 5);
@@ -52,47 +64,47 @@ void HT16K33Disp::Text(byte address, String text1)
     {
         c2 = convert(text2[i]);
         //------------------------------
-        Wire.beginTransmission(address);
-        Wire.write(i*2);
-        Wire.write(c2 & 0x00FF);
-        Wire.write((c2 & 0xFF00) >> 8);
-        Wire.endTransmission();
+        _wire->beginTransmission(_address);
+        _wire->write(i*2);
+        _wire->write(c2 & 0x00FF);
+        _wire->write((c2 & 0xFF00) >> 8);
+        _wire->endTransmission();
         delay(100);
     } 
 }
 //------------------------------------------------------------
-void HT16K33Disp::Num(byte address, byte digit, int n)
+void HT16K33Disp::Num(byte digit, int n)
 {
     switch(n)
     {
-      case 0: Char(address, digit, '0'); break;
-      case 1: Char(address, digit, '1'); break;
-      case 2: Char(address, digit, '2'); break;
-      case 3: Char(address, digit, '3'); break;
-      case 4: Char(address, digit, '4'); break;
-      case 5: Char(address, digit, '5'); break;
-      case 6: Char(address, digit, '6'); break;
-      case 7: Char(address, digit, '7'); break;
-      case 8: Char(address, digit, '8'); break;
-      case 9: Char(address, digit, '9');
+      case 0: Char( digit, '0'); break;
+      case 1: Char( digit, '1'); break;
+      case 2: Char( digit, '2'); break;
+      case 3: Char( digit, '3'); break;
+      case 4: Char( digit, '4'); break;
+      case 5: Char( digit, '5'); break;
+      case 6: Char( digit, '6'); break;
+      case 7: Char( digit, '7'); break;
+      case 8: Char( digit, '8'); break;
+      case 9: Char( digit, '9');
     }
 }
 //------------------------------------------------------------
-void HT16K33Disp::Numdp(byte address, byte digit, int n)
+void HT16K33Disp::Numdp(byte digit, int n)
 {
     uint16_t c2;   
     c2 = convertdp(n);
     //------------------------------
-    Wire.beginTransmission(address);
-    Wire.write(digit*2);
-    Wire.write(c2 & 0x00FF);
-    Wire.write((c2 & 0xFF00) >> 8);
-    Wire.endTransmission();
+    _wire->beginTransmission(_address);
+    _wire->write(digit*2);
+    _wire->write(c2 & 0x00FF);
+    _wire->write((c2 & 0xFF00) >> 8);
+    _wire->endTransmission();
 }
 //------------------------------------------------------------
-void HT16K33Disp::Clear(byte address)
+void HT16K33Disp::Clear()
 {
-    for(byte i=0; i<=3; i++) Char(address, i, ' ');
+    for(byte i=0; i<=3; i++) Char( i, ' ');
 }
 //------------------------------------------------------------
 // Functions
