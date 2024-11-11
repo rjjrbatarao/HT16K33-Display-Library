@@ -1,4 +1,5 @@
 # HT16K33 14-Segment Display Library
+ESP32 compatible.
 List of functions to control HT16K33 display:
 1. Init()  : initializes HT16K33 & sets brightness level of display
 2. Clear() : clears 4-digit display
